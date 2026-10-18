@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>クレーンゲーム生活手帳</title>
+<meta name="description" content="クレーンゲームのプレイ費用・獲得プライズ・メルカリや買取店での売却益を記録する手帳">
+<meta name="theme-color" content="#ff4f7b">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: one column notebook; balance header on top, sections switched by a bottom tab bar. */
+:root{
+  --bg:#fff7f2; --paper:#ffffff; --ink:#2b2230; --muted:#7d7184; --line:#efe2dc;
+  --accent:#ff4f7b; --accent-ink:#ffffff; --mint:#16a58a; --gold:#e3a51a; --loss:#d93a3a; --gain:#16a58a;
+  --soft:#fff0f4; --shadow:0 6px 20px rgba(80,30,50,.08);
+  --f-display:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17131b; --paper:#221c27; --ink:#f5eef7; --muted:#a99db0; --line:#352b3b;
+  --accent:#ff6b90; --accent-ink:#1a0d13; --mint:#3fd0b0; --gold:#f2c14e; --loss:#ff7070; --gain:#3fd0b0;
+  --soft:#2c1f2a; --shadow:0 6px 20px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17131b; --paper:#221c27; --ink:#f5eef7; --muted:#a99db0; --line:#352b3b;
+  --accent:#ff6b90; --accent-ink:#1a0d13; --mint:#3fd0b0; --gold:#f2c14e; --loss:#ff7070; --gain:#3fd0b0;
+  --soft:#2c1f2a; --shadow:0 6px 20px rgba(0,0,0,.35); color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.num{font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* header */
+header{padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:6px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:4px 8px;flex-wrap:wrap}
+.brand h1{margin:0;font-family:var(--f-display);font-weight:800;font-size:18px;letter-spacing:.02em;white-space:nowrap}
+.brand a{color:var(--muted);font-size:12.5px;text-decoration:none}
+.balance{margin-top:12px;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px 18px;box-shadow:var(--shadow)}
+.balance .lab{font-size:12px;color:var(--muted);letter-spacing:.08em}
+.balance .big{font-family:var(--f-display);font-weight:800;font-size:clamp(34px,10vw,46px);line-height:1.15}
+.balance .big small{font-size:.5em;margin-left:2px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.stat{min-width:0}
+.stat .k{font-size:11px;color:var(--muted);white-space:nowrap}
+.stat .v{font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pos{color:var(--gain)} .neg{color:var(--loss)}
+@media (max-width:420px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* sections */
+section{padding-top:16px}
+h2{font-family:var(--f-display);font-weight:800;font-size:17px;margin:0 0 10px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.field label{font-size:12.5px;color:var(--muted)}
+input[type=text],input[type=number],input[type=date],select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);font-size:16px}
+input:focus{border-color:var(--accent);outline:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 12px;font-size:13px}
+.chip:hover{border-color:var(--accent)}
+
+/* play machine */
+.machine{text-align:center;padding:22px 16px}
+.counter{font-size:13px;color:var(--muted)}
+.counter b{font-family:var(--f-display);font-size:28px;color:var(--ink);margin:0 2px}
+.playbtn{position:relative;width:min(220px,60vw);aspect-ratio:1;border-radius:50%;border:0;margin:14px auto 6px;display:grid;place-items:center;
+  background:radial-gradient(circle at 35% 30%,#ff9bb4 0,var(--accent) 45%,#c52552 100%);color:#fff;
+  box-shadow:0 10px 0 #a51a42,0 16px 30px rgba(200,40,80,.35),inset 0 -6px 12px rgba(0,0,0,.15);
+  font-family:var(--f-display);font-weight:800;font-size:clamp(22px,7vw,28px);line-height:1.2;transition:transform .06s,box-shadow .06s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.playbtn small{display:block;font-size:.55em;font-weight:700;opacity:.9}
+.playbtn:active,.playbtn.hit{transform:translateY(8px);box-shadow:0 2px 0 #a51a42,0 6px 14px rgba(200,40,80,.3),inset 0 -4px 10px rgba(0,0,0,.15)}
+.coin{position:absolute;left:50%;top:10%;font-family:var(--f-display);font-weight:800;color:var(--accent);pointer-events:none;animation:coin .8s ease-out forwards}
+@keyframes coin{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-60px)}}
+.actions{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:8px;margin-top:14px}
+.actions .btn{white-space:nowrap;padding-left:6px;padding-right:6px}
+.btn{border:0;border-radius:14px;padding:13px 12px;font-weight:700;font-size:15px;background:var(--soft);color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.mint{background:var(--mint);color:#fff}
+.btn.ghost{background:transparent;border:1.5px solid var(--line)}
+.btn.danger{background:transparent;border:1.5px solid var(--loss);color:var(--loss)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.sm{padding:7px 12px;font-size:13px;border-radius:10px}
+.today{display:flex;justify-content:space-around;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
+.today b{display:block;font-size:16px;color:var(--ink)}
+
+/* lists */
+.list{display:flex;flex-direction:column;gap:10px}
+.item{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+.item .main{flex:1;min-width:0}
+.item .name{font-weight:700;overflow-wrap:anywhere}
+.item .sub{font-size:12.5px;color:var(--muted)}
+.item .side{text-align:right;white-space:nowrap}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--accent);margin-right:4px}
+.badge.shop{color:var(--mint)}
+.empty{text-align:center;color:var(--muted);padding:28px 12px;border:1.5px dashed var(--line);border-radius:16px;font-size:14px}
+.sumbar{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:10px}
+.sumbar b{color:var(--ink)}
+.seg{display:inline-flex;background:var(--soft);border-radius:12px;padding:3px;gap:3px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:7px 14px;font-weight:700;font-size:13.5px;color:var(--muted)}
+.seg button.on{background:var(--paper);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+
+/* product stats */
+.prod{background:var(--paper);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.prod summary{list-style:none;padding:12px 14px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.prod summary::-webkit-details-marker{display:none}
+.prod summary .name{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}
+.prod .kv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:0 14px 10px;font-size:12px;color:var(--muted)}
+.prod .kv b{display:block;font-size:14px;color:var(--ink)}
+.prod table{width:100%;border-collapse:collapse;font-size:13px}
+.prod td,.prod th{padding:7px 14px;border-top:1px solid var(--line);text-align:left;white-space:nowrap}
+.prod th{font-weight:500;color:var(--muted);font-size:12px}
+.prod td.r,.prod th.r{text-align:right}
+.tablewrap{overflow-x:auto}
+@media (max-width:420px){.prod .kv{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* tab bar */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:1px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+nav.tabs button{border:0;background:transparent;border-radius:12px;padding:6px 2px;font-size:11.5px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button.on{color:var(--accent);background:var(--soft)}
+nav.tabs .cnt{font-size:10px;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:0 6px;margin-left:2px}
+
+/* dialogs */
+dialog{border:0;border-radius:20px;padding:0;width:min(520px,calc(100vw - 24px));background:var(--paper);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(20,10,20,.45)}
+.dlg{padding:20px}
+.dlg h3{margin:0 0 4px;font-family:var(--f-display);font-weight:800;font-size:19px}
+.dlg .hint{font-size:12.5px;color:var(--muted);margin:0 0 14px}
+.dlg .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.calc{background:var(--soft);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:14px}
+.calc div{display:flex;justify-content:space-between}
+.calc .tot{border-top:1px dashed var(--line);margin-top:6px;padding-top:6px;font-weight:700;font-size:16px}
+.stack{display:flex;flex-direction:column;gap:12px}
+
+/* read-only / sync */
+.ro .edit-only{display:none!important}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 10px;background:var(--paper)}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.sync.ok i{background:var(--gain)} .sync.wait i{background:var(--gold)} .sync.busy i{background:var(--gold);animation:blink 1s infinite} .sync.err i{background:var(--loss)}
+.sync.err{color:var(--loss);border-color:var(--loss);cursor:pointer}
+@keyframes blink{50%{opacity:.3}}
+.banner{margin-top:12px;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:13.5px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.steps{margin:6px 0 0;padding-left:20px;font-size:13px;color:var(--muted)}
+.steps li{margin:2px 0}
+details.more summary{cursor:pointer;font-size:13px;color:var(--muted)}
+#toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;font-size:14px;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><h1>🎪 クレーンゲーム生活手帳</h1><div class="row" style="gap:8px"><span class="sync" id="sync" hidden><i></i><span></span></span><a href="../">一覧へ</a></div></div>
+    <div class="banner" id="viewBanner" hidden><span>公開中の記録を見ています（閲覧のみ）。</span><button class="btn primary sm" id="startEdit">記録をつける</button></div>
+    <div class="balance">
+      <div class="lab">いまの所持金</div>
+      <div class="big num" id="bal">0<small>円</small></div>
+      <div class="stats">
+        <div class="stat"><div class="k">元手</div><div class="v num" id="sCap"></div></div>
+        <div class="stat"><div class="k">プレイ代</div><div class="v num" id="sSpent"></div></div>
+        <div class="stat"><div class="k">売却の手取り</div><div class="v num" id="sIncome"></div></div>
+        <div class="stat"><div class="k">通算の収支</div><div class="v num" id="sPL"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PLAY -->
+  <section id="tab-play">
+    <div class="card machine">
+      <div class="field edit-only" style="text-align:left">
+        <label for="store">いまいるゲームセンター（イニシャルで。例：M店）</label>
+        <input id="store" type="text" list="dlStores" placeholder="例：M店" autocomplete="off" maxlength="20">
+      </div>
+      <div class="chips edit-only" id="storeChips"></div>
+      <button class="playbtn edit-only" id="playBtn" aria-label="1プレイする（100円）">PLAY<small id="playCostLab">−100円</small></button>
+      <div class="counter edit-only">この台で <b class="num" id="pendN">0</b> 回 ／ <span class="num" id="pendY">0円</span></div>
+      <div class="actions edit-only">
+        <button class="btn primary" id="winBtn">🎉 獲った！</button>
+        <button class="btn ghost" id="undoBtn">1回戻す</button>
+        <button class="btn ghost" id="quitBtn">やめる</button>
+      </div>
+      <div class="today">
+        <div>今日のプレイ<b class="num" id="tPlays">0回</b></div>
+        <div>今日の出費<b class="num" id="tSpent">0円</b></div>
+        <div>今日の獲得<b class="num" id="tWins">0個</b></div>
+      </div>
+    </div>
+    <section>
+      <h2>最近の獲得</h2>
+      <div class="list" id="recentWins"></div>
+    </section>
+  </section>
+
+  <!-- STOCK -->
+  <section id="tab-stock" hidden>
+    <h2>在庫（まだ売っていないプライズ）</h2>
+    <div class="sumbar" id="stockSum"></div>
+    <div class="list" id="stockList"></div>
+  </section>
+
+  <!-- SOLD -->
+  <section id="tab-sold" hidden>
+    <h2>売却済み</h2>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <div class="seg" id="soldFilter"><button data-f="all" class="on">すべて</button><button data-f="mercari">メルカリ</button><button data-f="shop">買取店</button></div>
+    </div>
+    <div class="sumbar" id="soldSum"></div>
+    <div class="list" id="soldList"></div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section id="tab-prod" hidden>
+    <h2>商品別の売れ行き</h2>
+    <div class="field" style="margin-bottom:12px"><label for="prodSearch">商品名で絞り込み</label><input id="prodSearch" type="text" placeholder="例：ぬいぐるみ" autocomplete="off"></div>
+    <div id="prodList"></div>
+    <h2 style="margin-top:22px">店舗別</h2>
+    <div id="storeList"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="tab-set" hidden>
+    <h2>GitHubに記録を保存</h2>
+    <div class="card stack" id="ghCard">
+      <p style="margin:0;font-size:13.5px" id="ghState"></p>
+      <div class="field edit-gh"><label for="ghToken">アクセストークン</label><input id="ghToken" type="password" autocomplete="off" placeholder="github_pat_…" spellcheck="false"></div>
+      <details class="more edit-gh"><summary>保存先（ふだんは変更不要）</summary>
+        <div class="row" style="margin-top:8px">
+          <div class="field"><label for="ghOwner">ユーザー名</label><input id="ghOwner" type="text" spellcheck="false"></div>
+          <div class="field"><label for="ghRepo">リポジトリ</label><input id="ghRepo" type="text" spellcheck="false"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div class="field"><label for="ghBranch">ブランチ</label><input id="ghBranch" type="text" spellcheck="false"></div>
+          <div class="field"><label for="ghPath">ファイル</label><input id="ghPath" type="text" spellcheck="false"></div>
+        </div>
+      </details>
+      <div class="row">
+        <button class="btn primary sm edit-gh" id="ghConnect">接続する</button>
+        <button class="btn ghost sm" id="ghSyncNow" hidden>いま保存する</button>
+        <button class="btn ghost sm" id="ghDisconnect" hidden>この端末の接続を解除</button>
+        <button class="btn ghost sm" id="localOnly">GitHubに保存せず、この端末だけで使う</button>
+      </div>
+      <details class="more"><summary>アクセストークンの作り方</summary>
+        <ol class="steps">
+          <li>GitHubの右上アイコン → Settings → Developer settings → Personal access tokens → <b>Fine-grained tokens</b> → Generate new token</li>
+          <li>Repository access で <b>Only select repositories</b> を選び、このリポジトリだけを指定</li>
+          <li>Permissions の Repository permissions で <b>Contents</b> を <b>Read and write</b> にする</li>
+          <li>作成されたトークンを上の欄に貼り付けて「接続する」</li>
+        </ol>
+        <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0">トークンはこの端末のブラウザの中だけに保存され、GitHubにもチャットにも送りません。他人の端末では接続しないでください。記録（data.json）はPublicのリポジトリに保存されるので、誰でも見られます。</p>
+      </details>
+    </div>
+
+    <div class="edit-only">
+    <h2 style="margin-top:22px">基本の設定</h2>
+    <div class="card stack">
+      <div class="row">
+        <div class="field"><label for="setCap">元手（円）</label><input id="setCap" type="number" inputmode="numeric" min="0" step="1000"></div>
+        <div class="field"><label for="setCost">1プレイの料金（円）</label><input id="setCost" type="number" inputmode="numeric" min="0" step="10"></div>
+        <div class="field"><label for="setFee">メルカリ手数料（%）</label><input id="setFee" type="number" inputmode="decimal" min="0" max="100" step="0.5"></div>
+      </div>
+      <div class="row"><button class="btn primary sm" id="saveSet">設定を保存</button><span style="font-size:12.5px;color:var(--muted)">料金を変えても、過去のプレイ代はそのときの金額のままです。</span></div>
+    </div>
+    <h2 style="margin-top:22px">バックアップ</h2>
+    <div class="card stack">
+      <p style="margin:0;font-size:13.5px;color:var(--muted)">記録をファイルとして書き出したり、書き出したファイルから戻したりできます。</p>
+      <div class="row">
+        <button class="btn mint sm" id="exportBtn">バックアップを書き出す</button>
+        <label class="btn ghost sm" for="importFile" style="display:inline-block">バックアップを読み込む</label>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </div>
+      <div class="row"><button class="btn danger sm" id="resetBtn">すべての記録を消す</button></div>
+    </div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="画面の切り替え"><div class="in">
+  <button data-tab="play" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>プレイ</button>
+  <button data-tab="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8l9-5 9 5v9l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v9"/></svg><span>在庫<span class="cnt" id="stockCnt" hidden></span></span></button>
+  <button data-tab="sold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M17 7.5c0-1.9-2.2-3-5-3s-5 1.2-5 3.2 2 2.8 5 3.3 5 1.4 5 3.4-2.2 3.1-5 3.1-5-1.2-5-3"/></svg>売却済み</button>
+  <button data-tab="prod"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>商品別</button>
+  <button data-tab="set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>設定</button>
+</div></nav>
+
+<datalist id="dlStores"></datalist>
+<datalist id="dlPrizes"></datalist>
+<datalist id="dlShops"></datalist>
+
+<!-- win dialog -->
+<dialog id="winDlg"><form method="dialog" class="dlg" id="winForm">
+  <h3>🎉 獲得したプライズ</h3>
+  <p class="hint" id="winHint"></p>
+  <div class="stack">
+    <div class="field"><label for="winName">プライズ名</label><input id="winName" type="text" list="dlPrizes" required placeholder="例：もちもちくまぬいぐるみ BIG" autocomplete="off"></div>
+    <div><div style="font-size:12.5px;color:var(--muted)">過去に獲ったものから選ぶ</div><div class="chips" id="prizeChips"></div></div>
+    <div class="field"><label for="winStore">ゲームセンター</label><input id="winStore" type="text" list="dlStores" placeholder="例：M店" autocomplete="off" maxlength="20"></div>
+  </div>
+  <div class="foot"><button type="button" class="btn ghost" data-close>キャンセル</button><button type="submit" class="btn primary">記録する</button></div>
+</form></dialog>
+
+<!-- sell dialog -->
+<dialog id="sellDlg"><form method="dialog" class="dlg" id="sellForm">
+  <h3>売却を記録</h3>
+  <p class="hint" id="sellHint"></p>
+  <div class="stack">
+    <div class="seg" id="chanSeg"><button type="button" data-c="mercari" class="on">メルカリ</button><button type="button" data-c="shop">買取店</button></div>
+    <div class="row">
+      <div class="field"><label for="sellPrice" id="sellPriceLab">販売価格（円）</label><input id="sellPrice" type="number" inputmode="numeric" min="0" step="1" required></div>
+      <div class="field" id="shipField"><label for="sellShip">送料（円）</label><input id="sellShip" type="number" inputmode="numeric" min="0" step="1" value="0"></div>
+    </div>
+    <div class="chips" id="shipChips"></div>
+    <div class="field" id="shopField" hidden><label for="sellShop">買取店（イニシャルで。例：A店）</label><input id="sellShop" type="text" list="dlShops" placeholder="例：A店" autocomplete="off" maxlength="20"></div>
+    <div class="field"><label for="sellDate">売れた日</label><input id="sellDate" type="date"></div>
+  </div>
+  <div class="calc num" id="sellCalc"></div>
+  <div class="foot"><button type="button" class="btn ghost" data-close>キャンセル</button><button type="submit" class="btn mint">売却を記録</button></div>
+</form></dialog>
+
+<!-- confirm dialog -->
+<dialog id="askDlg"><form method="dialog" class="dlg">
+  <h3 id="askTitle"></h3>
+  <p class="hint" id="askText" style="margin-bottom:0"></p>
+  <div class="foot"><button value="no" class="btn ghost" id="askNo">やめておく</button><button value="yes" class="btn danger" id="askYes"></button></div>
+</form></dialog>
+
+<div id="toast" role="status" hidden></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const KEY = 'crane-notebook-v1';
+const yen = n => (n < 0 ? '−' : '') + Math.abs(Math.round(n)).toLocaleString('ja-JP') + '円';
+const sgn = n => (n > 0 ? '+' : '') + yen(n);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const dayKey = t => { const d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const fmtDate = t => { const d = new Date(t); return (d.getMonth() + 1) + '/' + d.getDate(); };
+const fmtFull = t => { const d = new Date(t); return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate(); };
+
+// ---------- state ----------
+const DEFAULT = () => ({ v: 1, capital: 50000, playCost: 100, feeRate: 10, plays: [], prizes: [], pending: 0, pendingCost: 0, store: '', updatedAt: 0 });
+let S = DEFAULT();
+const readJSON = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+const writeJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+function loadLocal() { const d = readJSON(KEY); return d ? Object.assign(DEFAULT(), d) : null; }
+function persistLocal() { writeJSON(KEY, S); }
+// soon: sync to GitHub quickly (after a prize or a sale) instead of waiting for the idle timer
+function save(soon) { S.updatedAt = Date.now(); persistLocal(); if (mode === 'github') scheduleSync(soon ? 1500 : 8000); }
+
+// ---------- mode & GitHub sync ----------
+// viewer: read-only view of the public data.json / local: this device only / github: this device + commits to the repo
+const GH_KEY = KEY + '-github', MODE_KEY = KEY + '-mode';
+const guessOwner = /\.github\.io$/.test(location.hostname) ? location.hostname.split('.')[0] : 'kiyohiro00';
+const guessRepo = /\.github\.io$/.test(location.hostname) ? (location.pathname.split('/')[1] || 'private-tools') : 'private-tools';
+const GH_DEF = { owner: guessOwner, repo: guessRepo, branch: 'main', path: 'crane-notebook/data.json', token: '' };
+let GH = Object.assign({}, GH_DEF, readJSON(GH_KEY) || {});
+let mode = readJSON(MODE_KEY) || (GH.token ? 'github' : 'viewer');
+let remoteSha = null, syncT = null, syncing = false, dirty = false, syncErr = '';
+const canEdit = () => mode !== 'viewer';
+
+const b64enc = str => { const by = new TextEncoder().encode(str); let bin = ''; for (let i = 0; i < by.length; i += 0x8000) bin += String.fromCharCode.apply(null, by.subarray(i, i + 0x8000)); return btoa(bin); };
+const b64dec = b => new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\s/g, '')), c => c.charCodeAt(0)));
+const encPath = p => p.split('/').map(encodeURIComponent).join('/');
+function api(path, opt = {}) {
+  return fetch(`https://api.github.com/repos/${encodeURIComponent(GH.owner)}/${encodeURIComponent(GH.repo)}${path}`, Object.assign({ cache: 'no-store' }, opt, {
+    headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + GH.token, 'X-GitHub-Api-Version': '2022-11-28' }
+  }));
+}
+function httpErr(r, what) {
+  const m = { 401: 'トークンが正しくないか、期限が切れています', 403: 'トークンにこのリポジトリへの書き込み権限がありません', 404: 'リポジトリが見つかりません（名前とトークンの対象を確認してください）' }[r.status] || `GitHubがエラーを返しました（${r.status}）`;
+  return new Error(m);
+}
+async function ghRead() {
+  const r = await api(`/contents/${encPath(GH.path)}?ref=${encodeURIComponent(GH.branch)}`);
+  if (r.status === 404) return { sha: null, data: null };
+  if (!r.ok) throw httpErr(r);
+  const j = await r.json();
+  return { sha: j.sha, data: JSON.parse(b64dec(j.content)) };
+}
+async function ghWrite() {
+  const body = { message: `クレーンゲーム手帳：記録を更新（${fmtFull(Date.now())}）`, content: b64enc(JSON.stringify(S)), branch: GH.branch };
+  if (remoteSha) body.sha = remoteSha;
+  const r = await api(`/contents/${encPath(GH.path)}`, { method: 'PUT', body: JSON.stringify(body) });
+  if (r.status === 409 || r.status === 422) { const e = new Error('conflict'); e.conflict = true; throw e; }
+  if (!r.ok) throw httpErr(r);
+  remoteSha = (await r.json()).content.sha;
+}
+function setSync(state, msg) {
+  const el = $('#sync'); el.hidden = mode !== 'github';
+  el.className = 'sync ' + state;
+  el.querySelector('span').textContent = { ok: 'GitHubに保存済み', wait: '保存待ち', busy: '保存中…', err: '保存できません（押して再試行）' }[state];
+  el.title = msg || '';
+}
+function scheduleSync(delay) { dirty = true; syncErr = ''; setSync('wait'); clearTimeout(syncT); syncT = setTimeout(syncNow, delay); }
+async function syncNow() {
+  clearTimeout(syncT); syncT = null;
+  if (mode !== 'github' || syncing || !dirty) return;
+  syncing = true; setSync('busy');
+  try { dirty = false; await ghWrite(); setSync('ok'); }
+  catch (e) {
+    dirty = true;
+    if (e.conflict) { syncing = false; await resolveConflict(); return; }
+    syncErr = e.message || 'ネットワークに接続できません'; setSync('err', syncErr);
+  } finally { syncing = false; }
+  if (dirty && !syncErr) scheduleSync(3000);
+}
+async function resolveConflict() {
+  let remote;
+  try { remote = await ghRead(); } catch (e) { syncErr = e.message; setSync('err', syncErr); return; }
+  remoteSha = remote.sha;
+  if (!remote.data) { syncNow(); return; }
+  const useRemote = await ask('ほかの端末で記録が更新されています', `GitHub側：${fmtStamp(remote.data.updatedAt)}／この端末：${fmtStamp(S.updatedAt)}。どちらの記録を残しますか？`, 'GitHubの記録を使う', 'この端末の記録で上書き');
+  if (useRemote) { S = Object.assign(DEFAULT(), remote.data); persistLocal(); dirty = false; setSync('ok'); $('#store').value = S.store || ''; render(); toast('GitHubの記録を読み込みました'); }
+  else { dirty = true; syncNow(); }
+}
+const fmtStamp = t => { if (!t) return '不明'; const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && dirty) syncNow(); });
+
+// ---------- derived ----------
+function totals() {
+  const spent = S.plays.reduce((a, p) => a + p.cost, 0);
+  const sold = S.prizes.filter(p => p.sale);
+  const income = sold.reduce((a, p) => a + p.sale.net, 0);
+  return { spent, income, balance: S.capital - spent + income, pl: income - spent, sold };
+}
+function mercariCalc(price, ship) {
+  const fee = Math.floor(price * S.feeRate / 100);
+  return { fee, ship, net: price - fee - ship };
+}
+function uniq(arr) { const m = new Map(); for (const v of arr) { const k = (v || '').trim(); if (k) m.set(k, (m.get(k) || 0) + 1); } return [...m.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]); }
+const storeNames = () => uniq(S.plays.map(p => p.store).concat(S.prizes.map(p => p.store)));
+const prizeNames = () => uniq(S.prizes.map(p => p.name));
+const shopNames = () => uniq(S.prizes.filter(p => p.sale && p.sale.channel === 'shop').map(p => p.sale.shop));
+const recentShips = () => uniq(S.prizes.filter(p => p.sale && p.sale.channel === 'mercari').map(p => String(p.sale.ship))).slice(0, 5);
+
+// ---------- rendering ----------
+function render() {
+  const T = totals();
+  $('#bal').innerHTML = yen(T.balance).replace('円', '') + '<small>円</small>';
+  $('#bal').classList.toggle('neg', T.balance < 0);
+  $('#sCap').textContent = yen(S.capital);
+  $('#sSpent').textContent = yen(T.spent);
+  $('#sIncome').textContent = yen(T.income);
+  const pl = $('#sPL'); pl.textContent = sgn(T.pl); pl.className = 'v num ' + (T.pl >= 0 ? 'pos' : 'neg');
+  // play
+  $('#playCostLab').textContent = '−' + yen(S.playCost);
+  $('#playBtn').setAttribute('aria-label', `1プレイする（${yen(S.playCost)}）`);
+  $('#pendN').textContent = S.pending;
+  $('#pendY').textContent = yen(S.pendingCost);
+  $('#undoBtn').disabled = S.pending === 0;
+  $('#quitBtn').disabled = S.pending === 0;
+  const today = dayKey(Date.now());
+  const tp = S.plays.filter(p => dayKey(p.t) === today);
+  $('#tPlays').textContent = tp.length + '回';
+  $('#tSpent').textContent = yen(tp.reduce((a, p) => a + p.cost, 0));
+  $('#tWins').textContent = S.prizes.filter(p => dayKey(p.wonAt) === today).length + '個';
+  // datalists & chips
+  fillList('#dlStores', storeNames()); fillList('#dlPrizes', prizeNames()); fillList('#dlShops', shopNames());
+  $('#storeChips').innerHTML = storeNames().slice(0, 4).filter(s => s !== S.store).map(s => `<button class="chip" data-store="${esc(s)}">${esc(s)}</button>`).join('');
+  // recent wins
+  const rec = S.prizes.slice().sort((a, b) => b.wonAt - a.wonAt).slice(0, 5);
+  $('#recentWins').innerHTML = rec.length ? rec.map(p => `<div class="item"><div class="main"><div class="name">${esc(p.name)}</div><div class="sub">${fmtDate(p.wonAt)} ・ ${esc(p.store || '店舗未記入')} ・ ${p.plays}回</div></div><div class="side num">${yen(p.cost)}<div class="sub">${p.sale ? '売却済み' : '在庫'}</div></div></div>`).join('')
+    : '<div class="empty">まだ記録がありません。<br>PLAYボタンを押してから、獲れたら「獲った！」で記録します。</div>';
+  renderStock(); renderSold(); renderProd();
+}
+function fillList(sel, arr) { $(sel).innerHTML = arr.map(v => `<option value="${esc(v)}"></option>`).join(''); }
+function renderStock() {
+  const st = S.prizes.filter(p => !p.sale).sort((a, b) => b.wonAt - a.wonAt);
+  const c = $('#stockCnt'); c.hidden = !st.length; c.textContent = st.length;
+  $('#stockSum').innerHTML = st.length ? `<span>在庫 <b class="num">${st.length}個</b></span><span>獲得にかかった額 <b class="num">${yen(st.reduce((a, p) => a + p.cost, 0))}</b></span>` : '';
+  $('#stockList').innerHTML = st.length ? st.map(p => `<div class="item"><div class="main"><div class="name">${esc(p.name)}</div><div class="sub">${fmtFull(p.wonAt)} ・ ${esc(p.store || '店舗未記入')} ・ ${p.plays}回 ${yen(p.cost)}</div></div><div class="side row edit-only" style="gap:6px;flex-wrap:nowrap"><button class="btn mint sm" data-sell="${p.id}">売る</button><button class="btn ghost sm" data-del="${p.id}" aria-label="削除">✕</button></div></div>`).join('')
+    : '<div class="empty">在庫はありません。獲得したプライズはここに並びます。</div>';
+}
+let soldFilter = 'all';
+function renderSold() {
+  const all = S.prizes.filter(p => p.sale);
+  const list = all.filter(p => soldFilter === 'all' || p.sale.channel === soldFilter).sort((a, b) => b.sale.t - a.sale.t);
+  const net = list.reduce((a, p) => a + p.sale.net, 0), cost = list.reduce((a, p) => a + p.cost, 0);
+  $('#soldSum').innerHTML = list.length ? `<span>件数 <b class="num">${list.length}</b></span><span>手取り合計 <b class="num">${yen(net)}</b></span><span>獲得額 <b class="num">${yen(cost)}</b></span><span>利益 <b class="num ${net - cost >= 0 ? 'pos' : 'neg'}">${sgn(net - cost)}</b></span>` : '';
+  $('#soldList').innerHTML = list.length ? list.map(p => {
+    const s = p.sale, prof = s.net - p.cost;
+    const ch = s.channel === 'mercari' ? '<span class="badge">メルカリ</span>' : `<span class="badge shop">買取店</span>${esc(s.shop || '')}`;
+    const det = s.channel === 'mercari' ? `${yen(s.price)} − 手数料${yen(s.fee)} − 送料${yen(s.ship)}` : `買取 ${yen(s.price)}`;
+    return `<div class="item"><div class="main"><div class="name">${esc(p.name)}</div><div class="sub">${fmtFull(s.t)} ・ ${ch}</div><div class="sub num">${det}</div></div><div class="side num"><b>${yen(s.net)}</b><div class="sub ${prof >= 0 ? 'pos' : 'neg'}">利益 ${sgn(prof)}</div><button class="btn ghost sm edit-only" style="margin-top:4px" data-unsell="${p.id}">取り消す</button></div></div>`;
+  }).join('') : '<div class="empty">まだ売却の記録はありません。在庫の「売る」から記録します。</div>';
+}
+function renderProd() {
+  const q = $('#prodSearch').value.trim();
+  const groups = new Map();
+  for (const p of S.prizes) { const k = p.name.trim(); if (q && !k.includes(q)) continue; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p); }
+  const rows = [...groups.entries()].map(([name, ps]) => {
+    const sold = ps.filter(p => p.sale);
+    const net = sold.reduce((a, p) => a + p.sale.net, 0), soldCost = sold.reduce((a, p) => a + p.cost, 0);
+    return { name, ps, sold, won: ps.length, avgCost: ps.reduce((a, p) => a + p.cost, 0) / ps.length, avgNet: sold.length ? net / sold.length : null, profit: net - soldCost, last: Math.max(...ps.map(p => p.sale ? p.sale.t : p.wonAt)) };
+  }).sort((a, b) => b.last - a.last);
+  $('#prodList').innerHTML = rows.length ? rows.map(r => `<details class="prod"><summary><span class="name">${esc(r.name)}</span><span class="num" style="font-weight:700">${r.avgNet == null ? '未売却' : '平均 ' + yen(r.avgNet)}</span></summary>
+    <div class="kv num"><div>獲得<b>${r.won}個</b></div><div>売却<b>${r.sold.length}個</b></div><div>平均獲得額<b>${yen(r.avgCost)}</b></div><div>利益合計<b class="${r.profit >= 0 ? 'pos' : 'neg'}">${r.sold.length ? sgn(r.profit) : '—'}</b></div></div>
+    ${r.sold.length ? `<div class="tablewrap"><table class="num"><thead><tr><th>売れた日</th><th>売り先</th><th class="r">売値</th><th class="r">手取り</th><th class="r">利益</th></tr></thead><tbody>${r.sold.sort((a, b) => b.sale.t - a.sale.t).map(p => `<tr><td>${fmtFull(p.sale.t)}</td><td>${p.sale.channel === 'mercari' ? 'メルカリ' : esc(p.sale.shop || '買取店')}</td><td class="r">${yen(p.sale.price)}</td><td class="r">${yen(p.sale.net)}</td><td class="r ${p.sale.net - p.cost >= 0 ? 'pos' : 'neg'}">${sgn(p.sale.net - p.cost)}</td></tr>`).join('')}</tbody></table></div>` : ''}
+  </details>`).join('') : `<div class="empty">${q ? '該当する商品がありません。' : '獲得したプライズが、商品名ごとにここへまとまります。'}</div>`;
+  // stores
+  const sm = new Map();
+  for (const p of S.plays) { const k = p.store || '店舗未記入'; const o = sm.get(k) || { plays: 0, spent: 0, wins: 0 }; o.plays++; o.spent += p.cost; sm.set(k, o); }
+  for (const p of S.prizes) { const k = p.store || '店舗未記入'; const o = sm.get(k) || { plays: 0, spent: 0, wins: 0 }; o.wins++; sm.set(k, o); }
+  const ss = [...sm.entries()].sort((a, b) => b[1].spent - a[1].spent);
+  $('#storeList').innerHTML = ss.length ? '<div class="list">' + ss.map(([k, o]) => `<div class="item"><div class="main"><div class="name">${esc(k)}</div><div class="sub num">${o.plays}回 ・ 獲得${o.wins}個 ・ 1個あたり ${o.wins ? yen(o.spent / o.wins) : '—'}</div></div><div class="side num">${yen(o.spent)}</div></div>`).join('') + '</div>'
+    : '<div class="empty">プレイすると、店舗ごとの出費と獲得数がここに出ます。</div>';
+}
+
+// ---------- actions ----------
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2200); }
+function currentStore() { return $('#store').value.trim(); }
+$('#store').value = S.store || '';
+$('#store').addEventListener('change', () => { S.store = currentStore(); save(); render(); });
+$('#storeChips').addEventListener('click', e => { const b = e.target.closest('[data-store]'); if (!b) return; $('#store').value = b.dataset.store; S.store = b.dataset.store; save(); render(); });
+
+$('#playBtn').addEventListener('click', () => {
+  if (!canEdit()) return;
+  S.store = currentStore();
+  S.plays.push({ t: Date.now(), store: S.store, cost: S.playCost });
+  S.pending++; S.pendingCost += S.playCost;
+  save(); render();
+  const b = $('#playBtn'); b.classList.add('hit'); setTimeout(() => b.classList.remove('hit'), 90);
+  const c = document.createElement('span'); c.className = 'coin'; c.textContent = '−' + S.playCost; b.parentElement.style.position = 'relative'; b.appendChild(c); setTimeout(() => c.remove(), 800);
+  if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) { }
+});
+$('#undoBtn').addEventListener('click', () => {
+  if (!S.pending) return;
+  const p = S.plays.pop(); S.pending--; S.pendingCost -= p.cost; save(); render(); toast('1回分を取り消しました');
+});
+$('#quitBtn').addEventListener('click', async () => {
+  if (!S.pending) return;
+  if (!await ask('この台をやめますか？', `ここまでの${S.pending}回（${yen(S.pendingCost)}）はプレイ代として残ります。獲得には結びつけません。`, 'やめる')) return;
+  S.pending = 0; S.pendingCost = 0; save(); render(); toast('カウンターをリセットしました');
+});
+
+// win
+$('#winBtn').addEventListener('click', () => {
+  $('#winHint').textContent = S.pending ? `この台で ${S.pending}回・${yen(S.pendingCost)} 使いました。この金額が獲得にかかった額になります。` : 'プレイ記録なしで獲得を記録します（獲得にかかった額は0円）。';
+  $('#winName').value = ''; $('#winStore').value = currentStore();
+  $('#prizeChips').innerHTML = prizeNames().slice(0, 10).map(n => `<button type="button" class="chip" data-name="${esc(n)}">${esc(n)}</button>`).join('') || '<span style="font-size:12.5px;color:var(--muted)">まだありません</span>';
+  $('#winDlg').showModal(); setTimeout(() => $('#winName').focus(), 50);
+});
+$('#prizeChips').addEventListener('click', e => { const b = e.target.closest('[data-name]'); if (b) $('#winName').value = b.dataset.name; });
+$('#winForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('#winName').value.trim(); if (!name) { $('#winName').focus(); return; }
+  const store = $('#winStore').value.trim();
+  S.prizes.push({ id: uid(), name, store, wonAt: Date.now(), plays: S.pending, cost: S.pendingCost, sale: null });
+  S.pending = 0; S.pendingCost = 0; if (store) S.store = store; $('#store').value = S.store;
+  save(true); $('#winDlg').close(); render(); toast(`「${name}」を在庫に追加しました`);
+});
+
+// sell
+let sellId = null, chan = 'mercari';
+function openSell(id) {
+  const p = S.prizes.find(x => x.id === id); if (!p) return;
+  sellId = id;
+  $('#sellHint').textContent = `${p.name}（獲得額 ${yen(p.cost)}）`;
+  $('#sellPrice').value = ''; $('#sellShip').value = recentShips()[0] || 0; $('#sellShop').value = shopNames()[0] || '';
+  $('#sellDate').value = dayKey(Date.now());
+  setChan('mercari');
+  $('#sellDlg').showModal(); setTimeout(() => $('#sellPrice').focus(), 50);
+}
+function setChan(c) {
+  chan = c;
+  [...$('#chanSeg').children].forEach(b => b.classList.toggle('on', b.dataset.c === c));
+  $('#shipField').hidden = c !== 'mercari'; $('#shipChips').hidden = c !== 'mercari'; $('#shopField').hidden = c !== 'shop';
+  $('#sellPriceLab').textContent = c === 'mercari' ? '販売価格（円）' : '買取価格（円）';
+  $('#shipChips').innerHTML = recentShips().map(s => `<button type="button" class="chip" data-ship="${esc(s)}">送料 ${yen(+s)}</button>`).join('');
+  calcSell();
+}
+function calcSell() {
+  const p = S.prizes.find(x => x.id === sellId); if (!p) return;
+  const price = Math.max(0, Math.round(+$('#sellPrice').value || 0)), ship = Math.max(0, Math.round(+$('#sellShip').value || 0));
+  let html;
+  if (chan === 'mercari') {
+    const m = mercariCalc(price, ship);
+    html = `<div><span>販売価格</span><span>${yen(price)}</span></div><div><span>手数料（${S.feeRate}%）</span><span>−${yen(m.fee)}</span></div><div><span>送料</span><span>−${yen(ship)}</span></div><div class="tot"><span>手取り</span><span>${yen(m.net)}</span></div>`;
+    html += `<div><span>獲得額を引いた利益</span><span class="${m.net - p.cost >= 0 ? 'pos' : 'neg'}">${sgn(m.net - p.cost)}</span></div>`;
+  } else {
+    html = `<div class="tot" style="border:0;margin:0;padding:0"><span>手取り</span><span>${yen(price)}</span></div><div><span>獲得額を引いた利益</span><span class="${price - p.cost >= 0 ? 'pos' : 'neg'}">${sgn(price - p.cost)}</span></div>`;
+  }
+  $('#sellCalc').innerHTML = html;
+}
+$('#chanSeg').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (b) setChan(b.dataset.c); });
+$('#shipChips').addEventListener('click', e => { const b = e.target.closest('[data-ship]'); if (b) { $('#sellShip').value = b.dataset.ship; calcSell(); } });
+['#sellPrice', '#sellShip'].forEach(s => $(s).addEventListener('input', calcSell));
+$('#sellForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const p = S.prizes.find(x => x.id === sellId); if (!p) return;
+  const price = Math.max(0, Math.round(+$('#sellPrice').value || 0));
+  if (!$('#sellPrice').value) { $('#sellPrice').focus(); return; }
+  const dv = $('#sellDate').value; const t = dv ? new Date(dv + 'T12:00:00').getTime() : Date.now();
+  if (chan === 'mercari') { const ship = Math.max(0, Math.round(+$('#sellShip').value || 0)); const m = mercariCalc(price, ship); p.sale = { t, channel: 'mercari', price, fee: m.fee, ship, net: m.net, shop: '' }; }
+  else p.sale = { t, channel: 'shop', price, fee: 0, ship: 0, net: price, shop: $('#sellShop').value.trim() };
+  save(true); $('#sellDlg').close(); render(); toast(`手取り ${yen(p.sale.net)} を収入に計上しました`);
+});
+
+$('#stockList').addEventListener('click', async e => {
+  const s = e.target.closest('[data-sell]'); if (s) { openSell(s.dataset.sell); return; }
+  const d = e.target.closest('[data-del]'); if (!d) return;
+  const p = S.prizes.find(x => x.id === d.dataset.del);
+  if (!await ask('この在庫を削除しますか？', `「${p.name}」の記録を消します。プレイ代の記録は残ります。`, '削除する')) return;
+  S.prizes = S.prizes.filter(x => x.id !== p.id); save(); render(); toast('削除しました');
+});
+$('#soldList').addEventListener('click', async e => {
+  const b = e.target.closest('[data-unsell]'); if (!b) return;
+  const p = S.prizes.find(x => x.id === b.dataset.unsell);
+  if (!await ask('売却を取り消しますか？', `「${p.name}」を在庫に戻し、手取り ${yen(p.sale.net)} を収入から外します。`, '取り消す')) return;
+  p.sale = null; save(); render(); toast('在庫に戻しました');
+});
+$('#soldFilter').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; soldFilter = b.dataset.f; [...$('#soldFilter').children].forEach(x => x.classList.toggle('on', x === b)); renderSold(); });
+$('#prodSearch').addEventListener('input', renderProd);
+
+// dialogs: close buttons
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
+function ask(title, text, yes, no) {
+  return new Promise(res => {
+    const d = $('#askDlg'); $('#askTitle').textContent = title; $('#askText').textContent = text; $('#askYes').textContent = yes; $('#askNo').textContent = no || 'やめておく';
+    d.returnValue = ''; d.showModal();
+    d.addEventListener('close', () => res(d.returnValue === 'yes'), { once: true });
+  });
+}
+
+// settings
+function fillSettings() { $('#setCap').value = S.capital; $('#setCost').value = S.playCost; $('#setFee').value = S.feeRate; }
+$('#saveSet').addEventListener('click', () => {
+  const cap = Math.round(+$('#setCap').value), cost = Math.round(+$('#setCost').value), fee = +$('#setFee').value;
+  if (!(cap >= 0) || !(cost >= 0) || !(fee >= 0 && fee <= 100)) { toast('数字を確認してください'); return; }
+  S.capital = cap; S.playCost = cost; S.feeRate = fee; save(); render(); toast('設定を保存しました');
+});
+$('#exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `crane-notebook-${dayKey(Date.now())}.json`;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  toast('バックアップを書き出しました');
+});
+$('#importFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (!data || !Array.isArray(data.plays) || !Array.isArray(data.prizes)) throw new Error('bad');
+    if (!await ask('バックアップを読み込みますか？', `いまの記録は、読み込んだファイルの内容（プレイ${data.plays.length}回・プライズ${data.prizes.length}個）に置き換わります。`, '読み込む')) return;
+    S = Object.assign(DEFAULT(), data); save(); fillSettings(); $('#store').value = S.store || ''; render(); toast('読み込みました');
+  } catch (err) { toast('このファイルは読み込めませんでした'); }
+});
+$('#resetBtn').addEventListener('click', async () => {
+  if (!await ask('すべての記録を消しますか？', 'プレイ・在庫・売却の記録がすべて消え、元に戻せません。先にバックアップを書き出しておくと安心です。', 'すべて消す')) return;
+  const keep = { capital: S.capital, playCost: S.playCost, feeRate: S.feeRate };
+  S = Object.assign(DEFAULT(), keep); save(); $('#store').value = ''; render(); toast('記録を消しました');
+});
+
+// tabs
+const TABS = ['play', 'stock', 'sold', 'prod', 'set'];
+function showTab(name) {
+  TABS.forEach(t => $('#tab-' + t).hidden = t !== name);
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+  if (name === 'set') fillSettings();
+  window.scrollTo(0, 0);
+  try { sessionStorage.setItem(KEY + '-tab', name); } catch (e) { }
+}
+document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+// ---------- GitHub settings UI ----------
+function applyMode() {
+  document.body.classList.toggle('ro', mode === 'viewer');
+  $('#viewBanner').hidden = mode !== 'viewer';
+  $('#sync').hidden = mode !== 'github';
+  $('#ghSyncNow').hidden = mode !== 'github';
+  $('#ghDisconnect').hidden = mode !== 'github';
+  $('#localOnly').hidden = mode !== 'viewer';
+  $('#ghConnect').textContent = mode === 'github' ? 'トークンを更新する' : '接続する';
+  $('#ghState').innerHTML = mode === 'github' ? `<b>接続中：</b>${esc(GH.owner)}/${esc(GH.repo)} の <code>${esc(GH.path)}</code> に記録を保存しています。`
+    : mode === 'local' ? '<b>この端末だけに保存中。</b>トークンを入れて接続すると、記録をGitHubに保存して公開できます。'
+      : '記録をつけるには、あなたのGitHubアクセストークンで接続してください。接続しない人は閲覧のみです。';
+  $('#ghOwner').value = GH.owner; $('#ghRepo').value = GH.repo; $('#ghBranch').value = GH.branch; $('#ghPath').value = GH.path;
+}
+$('#ghConnect').addEventListener('click', async () => {
+  const tok = $('#ghToken').value.trim() || GH.token;
+  if (!tok) { toast('トークンを入力してください'); $('#ghToken').focus(); return; }
+  const next = { owner: $('#ghOwner').value.trim() || GH_DEF.owner, repo: $('#ghRepo').value.trim() || GH_DEF.repo, branch: $('#ghBranch').value.trim() || 'main', path: $('#ghPath').value.trim() || GH_DEF.path, token: tok };
+  const prev = GH; GH = next;
+  const btn = $('#ghConnect'); btn.disabled = true; btn.textContent = '確認中…';
+  try {
+    const rr = await api('');
+    if (!rr.ok) throw httpErr(rr);
+    const remote = await ghRead();
+    remoteSha = remote.sha;
+    const local = loadLocal();
+    const localHas = local && (local.plays.length || local.prizes.length);
+    let pushLocal = false;
+    if (remote.data && localHas && local.updatedAt !== remote.data.updatedAt) {
+      const useRemote = await ask('どちらの記録を使いますか？', `GitHub側：プライズ${remote.data.prizes.length}個（${fmtStamp(remote.data.updatedAt)}）／この端末：プライズ${local.prizes.length}個（${fmtStamp(local.updatedAt)}）`, 'GitHubの記録を使う', 'この端末の記録を使う');
+      S = Object.assign(DEFAULT(), useRemote ? remote.data : local); pushLocal = !useRemote;
+    } else if (remote.data) S = Object.assign(DEFAULT(), remote.data);
+    else { S = localHas ? local : (mode === 'viewer' ? DEFAULT() : S); pushLocal = true; }
+    writeJSON(GH_KEY, GH); mode = 'github'; writeJSON(MODE_KEY, mode);
+    $('#ghToken').value = ''; persistLocal(); applyMode(); $('#store').value = S.store || ''; render();
+    if (pushLocal) { if (!S.updatedAt) S.updatedAt = Date.now(); scheduleSync(300); } else setSync('ok');
+    toast('GitHubに接続しました');
+  } catch (e) { GH = prev; toast(e.message || '接続できませんでした'); }
+  finally { btn.disabled = false; if (mode !== 'github') btn.textContent = '接続する'; else btn.textContent = 'トークンを更新する'; }
+});
+$('#ghSyncNow').addEventListener('click', () => { dirty = true; syncErr = ''; syncNow(); });
+$('#sync').addEventListener('click', () => { if (syncErr) { syncErr = ''; dirty = true; syncNow(); } });
+$('#ghDisconnect').addEventListener('click', async () => {
+  if (!await ask('この端末の接続を解除しますか？', 'この端末に保存したトークンを消し、閲覧のみの表示に戻します。GitHub上の記録はそのまま残ります。', '解除する')) return;
+  if (dirty) await syncNow();
+  GH.token = ''; writeJSON(GH_KEY, GH); mode = 'viewer'; writeJSON(MODE_KEY, mode); location.reload();
+});
+$('#localOnly').addEventListener('click', () => {
+  mode = 'local'; writeJSON(MODE_KEY, mode);
+  S = loadLocal() || DEFAULT(); $('#store').value = S.store || ''; applyMode(); render(); showTab('play'); toast('この端末だけで記録します');
+});
+$('#startEdit').addEventListener('click', () => { showTab('set'); setTimeout(() => $('#ghToken').focus(), 100); });
+
+async function boot() {
+  if (mode === 'github') {
+    S = loadLocal() || DEFAULT(); applyMode(); render(); setSync('busy');
+    try {
+      const r = await ghRead(); remoteSha = r.sha;
+      if (r.data && (r.data.updatedAt || 0) > (S.updatedAt || 0)) { S = Object.assign(DEFAULT(), r.data); persistLocal(); setSync('ok'); }
+      else if (!r.data || (S.updatedAt || 0) > (r.data.updatedAt || 0)) scheduleSync(500);
+      else setSync('ok');
+    } catch (e) { syncErr = e.message; setSync('err', syncErr); }
+  } else if (mode === 'local') {
+    S = loadLocal() || DEFAULT();
+  } else {
+    try { const r = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) S = Object.assign(DEFAULT(), await r.json()); } catch (e) { }
+  }
+  $('#store').value = S.store || '';
+  applyMode(); render();
+}
+boot();
+try { const t = sessionStorage.getItem(KEY + '-tab'); if (t && TABS.includes(t)) showTab(t); } catch (e) { }
+</script>
+</body>
+</html>
