@@ -1,1 +1,1 @@
-{"v":1,"capital":50000,"playCost":100,"feeRate":10,"plays":[],"prizes":[],"pending":0,"pendingCost":0,"store":"","updatedAt":1792354595134}
+{"v":1,"capital":50000,"playCost":100,"feeRate":10,"plays":[{"t":1792354609474,"store":"","cost":100}],"prizes":[],"pending":1,"pendingCost":100,"store":"","updatedAt":1792354609474}
